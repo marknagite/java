@@ -1,0 +1,63 @@
+public class StringArrayManager {
+    private String[] data;
+    private int len;
+
+    public StringArrayManager() {
+        len = 0;
+        data = new String[len];
+    }
+
+    public void append(String el) {
+        String[] temp = new String[len + 1];
+        int pos = 0;
+        
+        for (; pos < len; pos++) {
+            if (data[pos].length() < el.length()) {
+                temp[pos] = data[pos];
+            } else {
+                break;
+            }
+        }
+        
+        temp[pos] = el;
+        
+        for (int j = pos; j < len; j++) {
+            temp[j + 1] = data[j];
+        }
+        
+        len++;
+        data = temp;
+}
+
+    public String findLongest() {
+        if (len == 0) return null;
+        return data[len - 1];
+    }
+
+    public float averageLength() {
+        if (len == 0) return 0;
+        float total = 0;
+        for (int i = 0; i < len; i++) {
+            total += data[i].length();
+        }
+        return total / len;
+    }
+
+    public void showContents() {
+        if (data == null || len == 0) {
+            System.out.println("Нет элементов");
+            return;
+        }
+        for (int i = 0; i < len; i++) {
+            System.out.println("Позиция " + i + ": " + data[i]);
+        }
+    }
+    
+    public boolean hasElements() {
+        return len > 0;
+    }
+    
+    public int count() {
+        return len;
+    }
+}
