@@ -1,0 +1,255 @@
+Book.java
+public class Goods {
+    private double priceValue;
+    private String itemName;
+
+    public Goods(String itemName, double priceValue) {
+        this.priceValue = priceValue;
+        this.itemName = itemName;
+    }	
+
+    public double getPriceValue() { 
+        return priceValue; 
+    }
+    
+    public String getItemName() { 
+        return itemName; 
+    }
+
+    @Override
+    public String toString() {
+        return itemName + " : " + priceValue + " рублев";
+    }
+}
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class PurchaseContainer {
+    private List<Goods> goodsList;
+
+    public PurchaseContainer() {
+        goodsList = new ArrayList<Goods>();
+    }
+
+    public void insertGoods(Goods goods) {
+        goodsList.add(goods);
+    }
+
+    public void eraseGoods(String itemName) {
+        goodsList.removeIf(g -> g.getItemName().equals(itemName));
+    }
+
+    public double computeTotal() {
+        double totalAmount = 0.0;
+        for (Goods goods : goodsList) {
+            totalAmount += goods.getPriceValue();
+        }
+        return totalAmount;
+    }
+
+    public void showAll() {
+        System.out.println("----- СПИСОК ТОВАРОВ -----");
+        for (int counter = 0; counter < goodsList.size(); counter++) {
+            System.out.println((counter + 1) + ") " + goodsList.get(counter));
+        }
+        System.out.println("Общая сумма: " + computeTotal() + " рублев");
+    }
+
+    public int totalItems() {
+        return goodsList.size();
+    }
+
+    public boolean hasGoods(String itemName) {
+        for (Goods goods : goodsList) {
+            if (goods.getItemName().equals(itemName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void emptyContainer() {
+        goodsList = new ArrayList<Goods>();
+    }
+    
+    public Goods getGoodsAt(int position) {
+        if (position < 0 || position >= goodsList.size()) {
+            throw new IndexOutOfBoundsException("Неверная позиция: " + position);
+        }
+        return goodsList.get(position);
+    }
+}
+
+
+Library.java
+
+
+public class ShopItem {
+    private double itemCost;
+    private String productName;
+
+    public ShopItem(String productName, double itemCost) {
+        this.itemCost = itemCost;
+        this.productName = productName;
+    }
+
+    public double getItemCost() { 
+        return itemCost; 
+    }
+    
+    public String getProductName() { 
+        return productName; 
+    }
+
+    @Override
+    public String formatItem() {
+        return productName + " [" + itemCost + " рублев]";
+    }
+    
+    public String toDisplayString() {
+        return productName + " стоимостью " + itemCost + " рублев";
+    }
+}
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class BasketManager {
+    private List<ShopItem> purchasedItems;
+
+    public BasketManager() {
+        purchasedItems = new LinkedList<ShopItem>();
+    }
+
+    public void includeItem(ShopItem newItem) {
+        if (newItem != null) {
+            purchasedItems.add(newItem);
+        }
+    }
+
+    public void excludeItem(String productName) {
+        purchasedItems.removeIf(item -> 
+            item.getProductName().equalsIgnoreCase(productName));
+    }
+
+    public double determineTotalCost() {
+        double finalSum = 0.0;
+        for (ShopItem currentItem : purchasedItems) {
+            finalSum += currentItem.getItemCost();
+        }
+        return Math.round(finalSum * 100.0) / 100.0;
+    }
+
+    public void printBasketDetails() {
+        if (purchasedItems.isEmpty()) {
+            System.out.println("Корзина покупок пуста");
+            return;
+        }
+        
+        System.out.println("КОРЗИНА");
+        for (int idx = 0; idx < purchasedItems.size(); idx++) {
+            System.out.printf("%2d. %s%n", idx + 1, purchasedItems.get(idx).formatItem());
+        }
+        System.out.printf("ИТОГ: %.2f рублев%n", determineTotalCost());
+    }
+
+    public int countItems() {
+        return purchasedItems.size();
+    }
+
+    public boolean checkItemExists(String productName) {
+        return purchasedItems.stream()
+                .anyMatch(item -> item.getProductName().equals(productName));
+    }
+
+    public void resetBasket() {
+        purchasedItems.clear();
+    }
+    
+    public ShopItem fetchItem(int index) {
+        if (index < 0 || index >= purchasedItems.size()) {
+            return null;
+        }
+        return purchasedItems.get(index);
+    }
+    
+    public double calculateAveragePrice() {
+        if (purchasedItems.isEmpty()) {
+            return 0.0;
+        }
+        return determineTotalCost() / purchasedItems.size();
+    }
+}
+
+
+
+
+
+
+
+package biblioteka;
+
+import java.util.List;
+
+public class LibraryDemo {
+    public static void main(String[] args) {
+        Biblioteka biblioteka = new Biblioteka();
+
+        biblioteka.dodajKnigu(new Kniga(101, "Война и мир",
+                "Лев Толстой", 1869, "978-5-17-090335-2"));
+        biblioteka.dodajKnigu(new Kniga(202, "Преступление и наказание",
+                "Фёдор Достоевский", 1866, "978-5-17-090336-9"));
+        biblioteka.dodajKnigu(new Kniga(303, "Анна Каренина",
+                "Лев Толстой", 1877, "978-5-17-090337-6"));
+        biblioteka.dodajKnigu(new Kniga(404, "Мастер и Маргарита",
+                "Михаил Булгаков", 1967, "978-5-17-090338-3"));
+
+        System.out.println("ПОИСК КНИГИ ПО ИДЕНТИФИКАТОРУ 202");
+        Kniga najdennajaKniga = biblioteka.najtiKniguPoId(202);
+        if (najdennajaKniga != null) {
+            System.out.println(najdennajaKniga.poluchitInfo());
+        } else {
+            System.out.println("Книга не найдена.");
+        }
+
+        System.out.println("КНИГИ АВТОРА 'ЛЕВ ТОЛСТОЙ' ");
+        List<Kniga> knigiTolstogo = biblioteka.najtiKnigiPoAvtoru("Лев Толстой");
+        for (Kniga k : knigiTolstogo) {
+            System.out.println(k.poluchitInfo());
+            System.out.println("---");
+        }
+
+        System.out.println(" ВЫДАЧА КНИГИ С ID 101");
+        boolean vydana = biblioteka.vydatKnigu(101);
+        System.out.println("Книга выдана: " + (vydana ? "ДА" : "НЕТ"));
+
+        System.out.println(" ДОСТУПНЫЕ ДЛЯ ВЫДАЧИ КНИГИ");
+        List<Kniga> dostupnyeKnigi = biblioteka.poluchitDostupnyeKnigi();
+        if (dostupnyeKnigi.isEmpty()) {
+            System.out.println("Нет доступных книг.");
+        } else {
+            for (Kniga k : dostupnyeKnigi) {
+                System.out.println(k.poluchitInfo());
+            }
+        }
+
+        System.out.println("ВОЗВРАТ КНИГИ С ID 101");
+        boolean vozvrawena = biblioteka.vernutKnigu(101);
+        System.out.println("Книга возвращена: " + (vozvrawena ? "ДА" : "НЕТ"));
+
+        System.out.println(" СТАТИСТИКА БИБЛИОТЕКИ");
+        String statistika = biblioteka.poluchitStatistiku();
+        System.out.println(statistika);
+
+        System.out.println("ЖУРНАЛ ОПЕРАЦИЙ");
+        biblioteka.vyvestiZhurnalOperacij();
+
+        System.out.println("ТЕСТИРОВАНИЕ ДОПОЛНИТЕЛЬНЫХ ФУНКЦИЙ");
+        boolean udalena = biblioteka.udalitKnigu(404);
+        System.out.println("Книга удалена: " + (udalena ? "ДА" : "НЕТ"));
+        
+        System.out.println("Обновлённая статистика:");
+        System.out.println(biblioteka.poluchitStatistiku());
+    }
+}
